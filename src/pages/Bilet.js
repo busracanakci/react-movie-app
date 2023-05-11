@@ -1,8 +1,23 @@
 import React ,{useState} from 'react'
 import clsx from 'clsx'
 import {  useNavigate } from "react-router-dom";
+import ReactDOM from "react-dom";
+import { CountdownCircleTimer } from "react-countdown-circle-timer";
+import { createStore } from 'redux';
 
+const renderTime = ({ remainingTime }) => {
+  if (remainingTime === 0) {
+    return window.location.reload();
+  }
 
+  return (
+    <div className="timer">
+      <div className="text">Sayfanın yenilenmesine</div>
+      <div className="value">{  Math.floor (remainingTime / 60) % 60} : {  Math.floor (remainingTime ) % 60}</div>
+      <div className="text">Dk kaldı</div>
+    </div>
+  );
+};
 
 
 const movies = [
@@ -21,11 +36,10 @@ const movies = [
 const seats = Array.from({length:8*8}, (_,i) => i)
 export default function Bilet() {
   
-  const refreshPage = ()=>{
-     setTimeout(()=>{
-        window.location.reload(false);
-    }, 500);
-    }
+  setInterval(function(){
+    window.location.reload(false);
+    },50000);
+
     const [selectedMovie, setSelectedMovie] = useState(movies[0])
     const [ selectedSeats, setSelectedSeats ] = useState([])
     const navigate = useNavigate();
@@ -40,7 +54,9 @@ const navigateDashboard = (event) => {
         onChange={movie => {
           setSelectedSeats([])
           setSelectedMovie(movie)
+          
         }}
+        
       />
       <ShowCase />
       <Cinema
@@ -48,6 +64,7 @@ const navigateDashboard = (event) => {
         selectedSeats={selectedSeats}
         onSelectedSeatsChange={selectedSeats => setSelectedSeats(selectedSeats)}
       />
+      
 
       <p className="info">
         Seçili Koltuk Sayısı : <span className="count">{selectedSeats.length}</span>{' '}
@@ -62,9 +79,17 @@ const navigateDashboard = (event) => {
   )
 }
 
-function Movies({ movie, onChange }) {
+function Movies({  movie, onChange }) {
   return (
     <div className="Movies">
+      <CountdownCircleTimer
+          isPlaying
+          duration={300}
+          colors={[["#004777", 0.33], ["#F7B801", 0.33], ["#A30000"]]}
+          onComplete={() => [true, 1000]}
+        >
+          {renderTime}
+        </CountdownCircleTimer>
       <h2>
           <label htmlFor="movie">Film : </label>
           <select className='select-style'
@@ -87,9 +112,12 @@ function Movies({ movie, onChange }) {
     )
 }
 
+
 function ShowCase() {
     return (
       <ul className="ShowCase">
+
+
         <li>
           <span className="seat" /> <small>Boş</small>
         </li>
@@ -102,7 +130,7 @@ function ShowCase() {
       </ul>
     )
   }
-
+  
   function Cinema({ movie, selectedSeats, onSelectedSeatsChange }) {
     function handleSelectedState(seat) {
       const isSelected = selectedSeats.includes(seat)
@@ -110,6 +138,7 @@ function ShowCase() {
         onSelectedSeatsChange(
           selectedSeats.filter(selectedSeat => selectedSeat !== seat),
         )
+        
        
       } else {
         onSelectedSeatsChange([...selectedSeats, seat])
@@ -120,13 +149,16 @@ function ShowCase() {
     }
   
     return (
+      
       <div className="Cinema">
+        
         <div className='screen'>PERDE</div>
         <div className="seats">
           
           {seats.map(seat => {
             const isSelected = selectedSeats.includes(seat)
             const isOccupied = movie.occupied.includes(seat)
+           
             return (
               <span
                 tabIndex="0"
